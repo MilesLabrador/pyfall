@@ -4,6 +4,37 @@
 <html>
   <head>
     <title>Spyfall</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script type="text/javascript">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on( 'connect', function() {
+        socket.emit( 'newconnection', {
+          data: 'User Connected'
+        } )
+        var form = $( '#newgameform' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let name = $( 'input.newgamename' ).val()
+          let time = $( 'input.time' ).val()
+          let minimumvotes = $( 'input.minimumvotes' ).val()
+          socket.emit( 'newgame', {
+            name : name,
+            time : time,
+            minimumvotes : minimumvotes
+          } )
+          $( 'input.name' ).val( '' ).focus()
+        } )
+        var form = $( '#joingameform' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let name = $( 'input.joingamename' ).val()
+          let gamekey = $( 'input.gamekey' ).val()
+          socket.emit( 'joingame', {
+            name : name,
+            gamekey : gamekey
+          } )
+        } )
+      } )
+    </script>
     <style>
       html, body {
         width:100%;
@@ -43,6 +74,12 @@
       <main>
         <div id="newgame" class="page">
           <h1>New Game</h1>
+          <form id="newgameform" action="" method="POST">
+            <input type="text" class="newgamename" placeholder="Name"/>
+            <input type="number" class="time" placeholder="duration"/>
+            <input type="number" class="minimumvotes" placeholder="Minimum Votes"/>
+            <input type="submit"/>
+          </form>
           <p>Name</p>
           <p>Time</p>
           <p>number votes needed</p>
@@ -51,6 +88,11 @@
         </div>
         <div id="joingame" class="page">
             <h1>Join Game</h1>
+            <form id="joingameform" action="" method="POST">
+              <input type="text" class = "joingamename" placeholder="Name"/>
+              <input type="text" class = "gamekey" placeholder="Game Key"/>
+              <input type="submit"/>
+            </form>
             <p>Game Key</p>
             <p>Name</p>
             <button onclick="window.location.href = '#home'">back</button>
