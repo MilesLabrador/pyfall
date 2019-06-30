@@ -7,21 +7,32 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
+      function generate_32bit_gamekey() { //adapted from https://stackoverflow.com/a/37378421 accessed 6-30-19
+        let u = new Uint32Array(1);
+        window.crypto.getRandomValues(u); //fill array with crypto-random 8 bit numbers
+        let str = u[0].toString(16); //convert bytes to base 16 (hex) string for alphanumeric
+        return '00000000'.slice(str.length) + str; //return 8 character long alphanumeric string padded by 0
+      }
+      
       var socket = io.connect('http://' + document.domain + ':' + location.port);
+      
       socket.on( 'connect', function() {
         socket.emit( 'newconnection', {
           data: 'User Connected'
         } )
-        var form = $( '#newgameform' ).on( 'submit', function( e ) {
+        var form = $( '#newgameform' ).on( 'submit', function( e ) { //On Submission of newgame form, put input strings into dictionary to send to python script
           e.preventDefault()
           let name = $( 'input.newgamename' ).val()
           let time = $( 'input.time' ).val()
           let minimumvotes = $( 'input.minimumvotes' ).val()
+          let gamekey = generate_32bit_gamekey()
           socket.emit( 'newgame', {
             name : name,
             time : time,
-            minimumvotes : minimumvotes
+            minimumvotes : minimumvotes,
+            gamekey : gamekey
           } )
+          window.location.href = '/'+gamekey
           $( 'input.name' ).val( '' ).focus()
         } )
         var form = $( '#joingameform' ).on( 'submit', function( e ) {
@@ -78,7 +89,7 @@
             <input type="text" class="newgamename" placeholder="Name"/>
             <input type="number" class="time" placeholder="duration"/>
             <input type="number" class="minimumvotes" placeholder="Minimum Votes"/>
-            <input type="submit"/>
+            <input type="submit" value="Create Game"/>
           </form>
           <p>Name</p>
           <p>Time</p>
@@ -91,7 +102,7 @@
             <form id="joingameform" action="" method="POST">
               <input type="text" class = "joingamename" placeholder="Name"/>
               <input type="text" class = "gamekey" placeholder="Game Key"/>
-              <input type="submit"/>
+              <input type="submit" value="Join Game"/>
             </form>
             <p>Game Key</p>
             <p>Name</p>
