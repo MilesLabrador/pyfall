@@ -1,3 +1,5 @@
 /pyfall
 *.pyc
 .vscode/settings.json
+.ipynb_checkpoints/Untitled-checkpoint.ipynb
+Untitled.ipynb

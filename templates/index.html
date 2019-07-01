@@ -20,22 +20,22 @@
         socket.emit( 'newconnection', {
           data: 'User Connected'
         } )
-        var form = $( '#newgameform' ).on( 'submit', function( e ) { //On Submission of newgame form, put input strings into dictionary to send to python script
+        var form = $( '#newgameform' ).on( 'submit', function( e ) { //On Submission of newgame form, put input strings and generated gameroom key into dictionary to send to Flask webserver
           e.preventDefault()
           let name = $( 'input.newgamename' ).val()
-          let time = $( 'input.time' ).val()
+          let duration = $( 'input.duration' ).val()
           let minimumvotes = $( 'input.minimumvotes' ).val()
           let gamekey = generate_32bit_gamekey()
           socket.emit( 'newgame', {
             name : name,
-            time : time,
+            duration : duration,
             minimumvotes : minimumvotes,
             gamekey : gamekey
           } )
-          window.location.href = '/'+gamekey
+          //window.location.href = '/'+gamekey
           $( 'input.name' ).val( '' ).focus()
         } )
-        var form = $( '#joingameform' ).on( 'submit', function( e ) {
+        var form = $( '#joingameform' ).on( 'submit', function( e ) { //On submission of joingame form, input strings are put into dictionary and sent to Flask webserver
           e.preventDefault()
           let name = $( 'input.joingamename' ).val()
           let gamekey = $( 'input.gamekey' ).val()
@@ -43,6 +43,7 @@
             name : name,
             gamekey : gamekey
           } )
+          //window.location.href = '/'+gamekey
         } )
       } )
     </script>
@@ -87,7 +88,7 @@
           <h1>New Game</h1>
           <form id="newgameform" action="" method="POST">
             <input type="text" class="newgamename" placeholder="Name"/>
-            <input type="number" class="time" placeholder="duration"/>
+            <input type="number" class="duration" placeholder="duration"/>
             <input type="number" class="minimumvotes" placeholder="Minimum Votes"/>
             <input type="submit" value="Create Game"/>
           </form>
