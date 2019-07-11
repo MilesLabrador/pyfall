@@ -22,30 +22,37 @@
         } )
         var form = $( '#newgameform' ).on( 'submit', function( e ) { //On Submission of newgame form, put input strings and generated gameroom key into dictionary to send to Flask webserver
           e.preventDefault()
-          let name = $( 'input.newgamename' ).val()
-          let duration = $( 'input.duration' ).val()
-          let minimumvotes = $( 'input.minimumvotes' ).val()
-          let gamekey = generate_32bit_gamekey()
+          let name = $( 'input.newgamename' ).val();
+          let duration = $( 'input.duration' ).val();
+          let minimumvotes = $( 'input.minimumvotes' ).val();
+          let gamekey = generate_32bit_gamekey();
           socket.emit( 'newgame', {
             name : name,
             duration : duration,
             minimumvotes : minimumvotes,
             gamekey : gamekey
-          } )
-          //window.location.href = '/'+gamekey
-          $( 'input.name' ).val( '' ).focus()
+          } );
+          window.location.href = '/#waitingroom'
+          //$( 'input.name' ).val( '' ).focus();
         } )
         var form = $( '#joingameform' ).on( 'submit', function( e ) { //On submission of joingame form, input strings are put into dictionary and sent to Flask webserver
-          e.preventDefault()
-          let name = $( 'input.joingamename' ).val()
-          let gamekey = $( 'input.gamekey' ).val()
+          e.preventDefault();
+          let name = $( 'input.joingamename' ).val();
+          let gamekey = $( 'input.gamekey' ).val();
           socket.emit( 'joingame', {
             name : name,
             gamekey : gamekey
-          } )
+          } );
           //window.location.href = '/'+gamekey
         } )
       } )
+      socket.on('joingameserver', function(){
+        window.location.href = '/#waitingroom';
+      });
+      socket.on('startgame', function(player_role){
+        window.location.href = '/#game';
+        $('#role').text(player_role);
+      });
     </script>
     <style>
       html, body {
@@ -92,11 +99,7 @@
             <input type="number" class="minimumvotes" placeholder="Minimum Votes"/>
             <input type="submit" value="Create Game"/>
           </form>
-          <p>Name</p>
-          <p>Time</p>
-          <p>number votes needed</p>
           <button onclick="window.location.href = '#home'">back</button>
-          <button onclick="window.location.href = 'gamekey'">create</button>
         </div>
         <div id="joingame" class="page">
             <h1>Join Game</h1>
@@ -105,10 +108,16 @@
               <input type="text" class = "gamekey" placeholder="Game Key"/>
               <input type="submit" value="Join Game"/>
             </form>
-            <p>Game Key</p>
-            <p>Name</p>
             <button onclick="window.location.href = '#home'">back</button>
-            <button onclick="window.location.href = 'gamekey'">join</button>
+        </div>
+        <div id="game" class="page">
+            <h1>You are Xthe spy!</h1>
+            <h3> Location: XX</h3>
+            <h3> Role: </h3><p id="role"></p>
+        </div>
+        <div id="waitingroom" class="page">
+          <h1> waiting for players to join</h1>
+          <button id='startgame' onclick="socket.emit('startgame')">Start Game</button>
         </div>
         <div id="home" class="page default">
           <h1>Welcome!</h1>
