@@ -33,6 +33,7 @@
             gamekey : gamekey
           } );
           window.location.href = '/#waitingroom'
+          $("#gamekey").text(gamekey)
           //$( 'input.name' ).val( '' ).focus();
         } )
         var form = $( '#joingameform' ).on( 'submit', function( e ) { //On submission of joingame form, input strings are put into dictionary and sent to Flask webserver
@@ -46,12 +47,16 @@
           //window.location.href = '/'+gamekey
         } )
       } )
-      socket.on('joingameserver', function(){
+      socket.on('joingameserver', function(gamekey){
         window.location.href = '/#waitingroom';
+        $("#gamekey").text(gamekey)
       });
       socket.on('startgame', function(player_role){
         window.location.href = '/#game';
         $('#role').text(player_role);
+      });
+      socket.on('update_players', function(players_list){
+        $("#players").html(players_list);
       });
     </script>
     <style>
@@ -116,7 +121,9 @@
             <h3> Role: </h3><p id="role"></p>
         </div>
         <div id="waitingroom" class="page">
+          <h1>Your gamekey is: </h1><p id="gamekey"></p>
           <h1> waiting for players to join</h1>
+          <h1>Players: </h1><ul id="players"></ul>
           <button id='startgame' onclick="socket.emit('startgame')">Start Game</button>
         </div>
         <div id="home" class="page default">

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 
 from locations import locations
 import numpy as np
@@ -42,6 +42,11 @@ class spyfallround():
             else:
                 self.players_roles[player] = 'Spy'
         self.started = True
+    def create_players_list_html(self):
+        html_players_list = ''
+        for player in self.players:
+            html_players_list+='<li>{}</li>'.format(player)
+        return html_players_list
 
 @app.route('/')
 def index():
@@ -66,6 +71,9 @@ def create_game(json, methods=['GET','POST']):
     socket_id = request.sid
     sockets_gamekey[socket_id] = createinfo_dict['gamekey']
     gamerooms[createinfo_dict['gamekey']] = spyfallround(createinfo_dict['gamekey'], createinfo_dict['duration'], createinfo_dict['name'], socket_id) # Create instance of spyfallround() with the socketio emitted user inputs from the create game page
+    join_room(createinfo_dict['gamekey'])
+    emit('update_players', gamerooms[createinfo_dict['gamekey']].create_players_list_html(), room=createinfo_dict['gamekey'])
+    print('HTML', gamerooms[createinfo_dict['gamekey']].create_players_list())
     print('players_in_game', gamerooms[createinfo_dict['gamekey']].players)
     print('TOTAL GAMEROOMS:', gamerooms)
     socketio.emit('')
@@ -84,7 +92,9 @@ def join_game(json, methods=['GET','POST']):
           print('Valid Gamekey, Valid Name, JOIN')
           gamerooms[joininfo_dict['gamekey']].players[joininfo_dict['name']] = socket_id
           print('total_players_in_game', gamerooms[joininfo_dict['gamekey']].players)
-          emit('joingameserver', room=socket_id)
+          emit('joingameserver', joininfo_dict['gamekey'], room=socket_id)
+          join_room(joininfo_dict['gamekey'])
+          emit('update_players', gamerooms[joininfo_dict['gamekey']].create_players_list_html(), room=joininfo_dict['gamekey'])
       else:
         print('Valid Gamekey, but Name taken, DONT JOIN')
     else:
